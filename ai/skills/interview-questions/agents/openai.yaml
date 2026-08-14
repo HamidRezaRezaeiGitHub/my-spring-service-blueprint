@@ -1,0 +1,4 @@
+interface:
+  display_name: "Interview Questions"
+  short_description: "Ask proportional decision questions before implementation."
+  default_prompt: "Interview me about this plan until the important decisions are clear."

@@ -1,0 +1,4 @@
+name: default-agent-instruction-pack
+version: 0.4.12
+installed_from: man-agent-ment
+description: Multi-agent instruction, workflow, wiki, validation, and requirement handoff starter pack.

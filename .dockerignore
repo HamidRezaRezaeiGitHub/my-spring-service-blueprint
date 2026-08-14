@@ -1,0 +1,41 @@
+# Anything not needed inside the build context (smaller, faster, safer images).
+
+# Build outputs and IDE clutter
+target/
+.idea/
+.vscode/
+*.iml
+out/
+build/
+.gradle/
+
+# OS / git
+.git/
+.gitignore
+.DS_Store
+Thumbs.db
+
+# Local state that must NEVER end up in an image
+data/
+logs/
+.env
+.env.*
+secrets/
+credentials/
+*.pem
+*.key
+*-firebase-adminsdk-*.json
+*google-service*.json
+client_secret_*.json
+*http-client.private.env.*
+
+# Frontend (lives in a separate repo; archived locally)
+frontend/
+
+# Docs / wiki are not needed at runtime
+docs/
+wiki/
+mock-data/
+README.md
+CLAUDE.md
+.github/

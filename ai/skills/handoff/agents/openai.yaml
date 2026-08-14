@@ -1,0 +1,4 @@
+interface:
+  display_name: "Handoff"
+  short_description: "Refresh the active requirement workspace for the next agent."
+  default_prompt: "Update the active requirement PLAN.md and FINDINGS.md so another agent can continue safely."

@@ -1,9 +1,33 @@
 services:
   postgres:
-    image: 'postgres:18-alpine'
+    image: postgres:18-alpine
     environment:
       - 'POSTGRES_DB=application'
       - 'POSTGRES_PASSWORD=application'
       - 'POSTGRES_USER=application'
     ports:
       - '5432:5432'
+    volumes:
+      - application-postgres:/var/lib/postgresql
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U application -d application']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  app:
+    profiles: [app]
+    build: .
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      DB_URL: jdbc:postgresql://postgres:5432/application
+      DB_USERNAME: application
+      DB_PASSWORD: application
+    ports:
+      - '8080:8080'
+
+volumes:
+  application-postgres:

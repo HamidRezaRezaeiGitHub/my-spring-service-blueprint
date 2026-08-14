@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "hooks": {
+    "sessionStart": [
+      {
+        "type": "command",
+        "bash": "sh ai/scripts/wiki-reminder-hook.sh sessionStart copilot",
+        "cwd": ".",
+        "timeoutSec": 5
+      }
+    ],
+    "subagentStart": [
+      {
+        "type": "command",
+        "bash": "sh ai/scripts/wiki-reminder-hook.sh subagentStart copilot",
+        "cwd": ".",
+        "timeoutSec": 5
+      }
+    ]
+  }
+}

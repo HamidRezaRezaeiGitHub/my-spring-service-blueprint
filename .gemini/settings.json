@@ -1,0 +1,19 @@
+{
+  "$schema": "https://raw.githubusercontent.com/google-gemini/gemini-cli/main/schemas/settings.schema.json",
+  "hooks": {
+    "BeforeAgent": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "name": "wiki-reminder",
+            "type": "command",
+            "command": "sh ai/scripts/wiki-reminder-hook.sh BeforeAgent",
+            "description": "Inject wiki reminder context before each agent run.",
+            "timeout": 5000
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh ai/scripts/wiki-reminder-hook.sh UserPromptSubmit",
+            "timeout_sec": 5
+          }
+        ]
+      }
+    ],
+    "SubagentStart": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh ai/scripts/wiki-reminder-hook.sh SubagentStart",
+            "timeout_sec": 5
+          }
+        ]
+      }
+    ]
+  }
+}

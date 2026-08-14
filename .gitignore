@@ -1,5 +1,14 @@
 HELP.md
 target/
+logs/
+.env
+.env.*
+secrets/
+credentials/
+*-firebase-adminsdk-*.json
+*google-service*.json
+client_secret_*.json
+*http-client.private.env.*
 .mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
