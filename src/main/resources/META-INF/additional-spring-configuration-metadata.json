@@ -1,0 +1,50 @@
+{
+  "properties": [
+    {
+      "name": "app.ai.max-prompt-length",
+      "type": "java.lang.Integer",
+      "description": "Maximum accepted AI prompt length before any provider call.",
+      "defaultValue": 4000
+    },
+    {
+      "name": "app.authentication.provider",
+      "type": "java.lang.String",
+      "description": "External authentication adapter: noop fails closed; firebase requires explicit Firebase configuration.",
+      "defaultValue": "noop"
+    },
+    {
+      "name": "app.firebase.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Creates shared Firebase SDK beans only when explicitly enabled.",
+      "defaultValue": false
+    },
+    {
+      "name": "app.firebase.service-account-key-path",
+      "type": "org.springframework.core.io.Resource",
+      "description": "Runtime-mounted Firebase service-account resource. Never commit the credential file."
+    },
+    {
+      "name": "app.security.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Enables the stateless Bearer security policy.",
+      "defaultValue": true
+    },
+    {
+      "name": "app.storage.provider",
+      "type": "java.lang.String",
+      "description": "Object storage adapter: noop fails closed; firebase uses Google Cloud Storage.",
+      "defaultValue": "noop"
+    },
+    {
+      "name": "app.storage.bucket",
+      "type": "java.lang.String",
+      "description": "Bucket used by the explicitly enabled Firebase storage adapter."
+    },
+    {
+      "name": "app.storage.max-file-size",
+      "type": "java.lang.Long",
+      "description": "Maximum signed-upload content length in bytes.",
+      "defaultValue": 10485760
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+spring:
+  application:
+    name: my-spring-service-blueprint-test
+  ai:
+    model:
+      audio:
+        speech: none
+        transcription: none
+      chat: none
+      embedding: none
+      image: none
+      moderation: none
+    mcp:
+      server:
+        enabled: false
+  datasource:
+    hikari:
+      maximum-pool-size: 2
+      minimum-idle: 0
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+
+app:
+  authentication:
+    provider: noop
+  firebase:
+    enabled: false
+  security:
+    enabled: true
+  storage:
+    provider: noop
+    max-file-size: 10485760
+    signed-url-duration: 15m

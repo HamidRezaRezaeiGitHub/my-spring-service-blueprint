@@ -1,1 +1,42 @@
-# my-spring-service-blueprint
+# Spring Service Blueprint
+
+A reusable Java 25 / Spring Boot 4 backend template with feature-first packages, PostgreSQL 18, Flyway, stateless Bearer security, optional Firebase adapters, REST and MCP parity, and optional OpenAI text generation.
+
+The default configuration is credential-free: Firebase, object storage, MCP, and chat models are disabled or fail closed. Start with [the wiki](wiki/index.md) for architecture and operating guidance.
+
+## Run locally
+
+Docker must be running. Spring Boot detects [compose.yaml](compose.yaml) and starts PostgreSQL 18 when needed.
+
+```bash
+./mvnw spring-boot:run
+```
+
+Useful endpoints:
+
+- `GET /api/v1/hello` — public shared hello use case.
+- `/v3/api-docs` and `/swagger-ui.html` — OpenAPI in non-production profiles.
+- `POST /api/v1/ai/generate` — protected; returns 503 until the `openai` profile is enabled.
+- `/mcp` — protected and present only when the `mcp` profile is enabled.
+
+## Validate
+
+```bash
+./mvnw clean compile
+./mvnw test
+./mvnw package -DskipTests
+docker build -t my-spring-service-blueprint:local .
+ai/scripts/wiki-lint.sh
+ai/scripts/lint-requirements.sh
+```
+
+The full test suite uses Testcontainers PostgreSQL 18 and therefore requires Docker.
+
+## Optional adapters
+
+- Firebase authentication: set `app.authentication.provider=firebase`, `app.firebase.enabled=true`, and mount a readable credential resource through `app.firebase.service-account-key-path`.
+- Firebase/Google Cloud Storage: additionally set `app.storage.provider=firebase` and `app.storage.bucket`.
+- MCP: activate `mcp`; the stateless endpoint remains protected by the normal security chain.
+- OpenAI: activate `openai` and provide `OPENAI_API_KEY`. Automated tests never make provider calls.
+
+Never commit credentials or bake them into an image. See [configuration](wiki/operations/configuration.md) and [security/providers](wiki/security/providers.md).

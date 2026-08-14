@@ -1,0 +1,35 @@
+spring:
+  application:
+    name: my-spring-service-blueprint
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+  flyway:
+    enabled: true
+  ai:
+    model:
+      audio:
+        speech: none
+        transcription: none
+      chat: none
+      embedding: none
+      image: none
+      moderation: none
+    mcp:
+      server:
+        enabled: false
+
+app:
+  ai:
+    max-prompt-length: 4000
+  authentication:
+    provider: noop
+  firebase:
+    enabled: false
+  security:
+    enabled: true
+  storage:
+    provider: noop
+    max-file-size: 10485760
+    signed-url-duration: 15m

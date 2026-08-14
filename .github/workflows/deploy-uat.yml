@@ -1,0 +1,44 @@
+name: Promote image
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: GitHub Environment and Spring profile
+        required: true
+        type: choice
+        options: [uat, production]
+      image_sha:
+        description: Tested commit SHA already published by the DEV workflow
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+
+    steps:
+      - uses: google-github-actions/auth@v3
+        with:
+          workload_identity_provider: ${{ vars.WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.DEPLOY_SERVICE_ACCOUNT }}
+
+      - uses: google-github-actions/setup-gcloud@v3
+
+      - name: Deploy existing image without rebuilding
+        shell: bash
+        env:
+          IMAGE: ${{ vars.ARTIFACT_REGISTRY_HOST }}/${{ vars.GCP_PROJECT_ID }}/${{ vars.ARTIFACT_REPOSITORY }}/${{ vars.CONTAINER_IMAGE }}:${{ inputs.image_sha }}
+        run: >-
+          gcloud run deploy "${{ vars.CLOUD_RUN_SERVICE }}"
+          --image="$IMAGE"
+          --project="${{ vars.GCP_PROJECT_ID }}"
+          --region="${{ vars.GCP_REGION }}"
+          --set-env-vars="SPRING_PROFILES_ACTIVE=${{ inputs.environment }},DB_URL=${{ vars.DB_URL }},DB_USERNAME=${{ vars.DB_USERNAME }}"
+          --set-secrets="DB_PASSWORD=${{ vars.DB_PASSWORD_SECRET }}:latest"
+          --quiet

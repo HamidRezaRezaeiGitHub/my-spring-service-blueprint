@@ -1,0 +1,64 @@
+name: Build and deploy DEV image
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  deploy:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    environment: dev
+
+    steps:
+      - name: Resolve tested commit
+        id: revision
+        shell: bash
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_run" ]]; then
+            echo "sha=${{ github.event.workflow_run.head_sha }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "sha=${{ github.sha }}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ steps.revision.outputs.sha }}
+
+      - uses: google-github-actions/auth@v3
+        with:
+          workload_identity_provider: ${{ vars.WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.DEPLOY_SERVICE_ACCOUNT }}
+
+      - uses: google-github-actions/setup-gcloud@v3
+
+      - name: Build and push the immutable image
+        shell: bash
+        env:
+          IMAGE: ${{ vars.ARTIFACT_REGISTRY_HOST }}/${{ vars.GCP_PROJECT_ID }}/${{ vars.ARTIFACT_REPOSITORY }}/${{ vars.CONTAINER_IMAGE }}:${{ steps.revision.outputs.sha }}
+        run: |
+          gcloud auth configure-docker "${{ vars.ARTIFACT_REGISTRY_HOST }}" --quiet
+          docker build --tag "$IMAGE" .
+          docker push "$IMAGE"
+
+      - name: Deploy tested image to DEV
+        shell: bash
+        env:
+          IMAGE: ${{ vars.ARTIFACT_REGISTRY_HOST }}/${{ vars.GCP_PROJECT_ID }}/${{ vars.ARTIFACT_REPOSITORY }}/${{ vars.CONTAINER_IMAGE }}:${{ steps.revision.outputs.sha }}
+        run: >-
+          gcloud run deploy "${{ vars.CLOUD_RUN_SERVICE }}"
+          --image="$IMAGE"
+          --project="${{ vars.GCP_PROJECT_ID }}"
+          --region="${{ vars.GCP_REGION }}"
+          --set-env-vars="SPRING_PROFILES_ACTIVE=dev,DB_URL=${{ vars.DB_URL }},DB_USERNAME=${{ vars.DB_USERNAME }}"
+          --set-secrets="DB_PASSWORD=${{ vars.DB_PASSWORD_SECRET }}:latest"
+          --quiet
