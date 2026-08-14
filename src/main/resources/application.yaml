@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: my-spring-service-blueprint
+  ai:
+    model:
+      audio:
+        speech: none
+        transcription: none
+      chat: none
+      embedding: none
+      image: none
+      moderation: none
+    mcp:
+      server:
+        enabled: false
