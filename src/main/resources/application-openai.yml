@@ -1,0 +1,15 @@
+spring:
+  ai:
+    model:
+      chat: openai
+    openai:
+      api-key: ${OPENAI_API_KEY}
+      chat:
+        timeout: 30s
+        options:
+          model: gpt-5-mini
+          max-completion-tokens: 1000
+
+app:
+  ai:
+    max-prompt-length: 4000

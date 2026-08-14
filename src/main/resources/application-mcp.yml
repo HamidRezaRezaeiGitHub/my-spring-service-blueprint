@@ -1,0 +1,13 @@
+spring:
+  ai:
+    mcp:
+      server:
+        enabled: true
+        protocol: STATELESS
+        name: my-spring-service-blueprint
+        version: 1.0.0
+        instructions: "Reusable service-template tools."
+        request-timeout: 20s
+
+# The default security chain protects /mcp. Configure a real authentication provider
+# before exposing this profile outside a trusted development environment.
