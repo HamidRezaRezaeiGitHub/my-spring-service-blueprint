@@ -9,7 +9,8 @@ import org.springframework.context.annotation.Import;
 class ApplicationTests {
 
 	@Test
-	void contextLoads() {
+	void context_shouldLoad_whenOptionalProvidersAreDisabled() {
+		// Arrange, act, and assert are performed by Spring Boot context initialization.
 	}
 
 }
