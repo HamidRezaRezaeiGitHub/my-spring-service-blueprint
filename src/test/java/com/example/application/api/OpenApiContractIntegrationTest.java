@@ -10,6 +10,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -32,8 +33,22 @@ class OpenApiContractIntegrationTest {
     private static final Set<String> HTTP_METHODS = Set.of(
             "get", "post", "put", "patch", "delete", "options", "head", "trace"
     );
-    private static final Set<String> PUBLISHED_TAGS = Set.of(
-            "AI", "Accounts", "Authentication", "Hello", "Storage"
+    private static final List<String> PUBLISHED_TAGS = List.of(
+            "Hello", "Authentication", "Accounts", "Storage", "AI"
+    );
+    private static final Set<String> PUBLISHED_ERROR_RESPONSES = Set.of(
+            "BadRequest", "Unauthorized", "Forbidden", "NotFound", "Conflict",
+            "UnsupportedMediaType", "InternalServerError", "ServiceUnavailable"
+    );
+    private static final Map<String, String> ERROR_RESPONSE_BY_STATUS = Map.of(
+            "400", "BadRequest",
+            "401", "Unauthorized",
+            "403", "Forbidden",
+            "404", "NotFound",
+            "409", "Conflict",
+            "415", "UnsupportedMediaType",
+            "500", "InternalServerError",
+            "503", "ServiceUnavailable"
     );
     private static final Set<String> PUBLISHED_SCHEMAS = Set.of(
             "AccountResponse",
@@ -74,7 +89,9 @@ class OpenApiContractIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.info.title").value("Spring Service Blueprint API"))
                 .andExpect(jsonPath("$.info.version").value("1.0"))
-                .andExpect(jsonPath("$.info.description").value("Reusable service-template API contracts"))
+                .andExpect(jsonPath("$.info.description").value(
+                        "Reusable service-template API contracts. Protected operations use Bearer JWTs, "
+                                + "versioned routes start with `/api/v1`, and errors use RFC 9457 Problem Details."))
                 .andExpect(jsonPath("$.paths.length()").value(8))
                 .andExpect(jsonPath("$.paths['/api/v1/hello'].get").exists())
                 .andExpect(jsonPath("$.paths['/api/v1/ai/generate'].post").exists())
@@ -102,12 +119,12 @@ class OpenApiContractIntegrationTest {
         JsonNode paths = apiDocs.path("paths");
 
         // Act and assert
-        Set<String> actualTags = StreamSupport.stream(apiDocs.path("tags").spliterator(), false)
-                .map(tag -> tag.path("name").textValue())
-                .collect(Collectors.toSet());
+        List<String> actualTags = StreamSupport.stream(apiDocs.path("tags").spliterator(), false)
+                .map(tag -> tag.path("name").asString())
+                .toList();
         assertEquals(PUBLISHED_TAGS, actualTags);
         for (JsonNode tag : apiDocs.path("tags")) {
-            assertHasText(tag.path("description"), tag.path("name").textValue() + " tag description");
+            assertHasText(tag.path("description"), tag.path("name").asString() + " tag description");
         }
 
         for (var pathEntry : paths.properties()) {
@@ -120,7 +137,7 @@ class OpenApiContractIntegrationTest {
                 assertHasText(operation.path("summary"), location + " summary");
                 assertHasText(operation.path("description"), location + " description");
                 assertHasText(operation.path("tags").path(0), location + " tag");
-                assertFalse(operation.path("tags").path(0).textValue().endsWith("-controller"),
+                assertFalse(operation.path("tags").path(0).asString().endsWith("-controller"),
                         () -> location + " must use a human-facing tag");
 
                 for (JsonNode parameter : operation.path("parameters")) {
@@ -141,16 +158,46 @@ class OpenApiContractIntegrationTest {
                 for (var responseEntry : operation.path("responses").properties()) {
                     String responseLocation = location + " response " + responseEntry.getKey();
                     JsonNode response = responseEntry.getValue();
-                    assertHasText(response.path("description"), responseLocation + " description");
                     if (Integer.parseInt(responseEntry.getKey()) >= 400) {
-                        assertTrue(response.path("content").has(APPLICATION_PROBLEM_JSON_VALUE),
-                                () -> responseLocation + " must document application/problem+json");
+                        String componentName = ERROR_RESPONSE_BY_STATUS.get(responseEntry.getKey());
+                        assertEquals("#/components/responses/" + componentName, response.path("$ref").asString(),
+                                () -> responseLocation + " must reference its reusable problem response");
                     } else if (!"204".equals(responseEntry.getKey())) {
+                        assertHasText(response.path("description"), responseLocation + " description");
                         assertTrue(response.path("content").has(APPLICATION_JSON_VALUE),
                                 () -> responseLocation + " must document application/json");
+                    } else {
+                        assertHasText(response.path("description"), responseLocation + " description");
                     }
                 }
             }
+        }
+    }
+
+    @Test
+    void apiDocs_shouldPublishReusableProblemResponses() throws Exception {
+        // Arrange
+        JsonNode responses = apiDocs().path("components").path("responses");
+        Set<String> actualResponses = responses.properties().stream()
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toSet());
+
+        // Act and assert
+        assertEquals(PUBLISHED_ERROR_RESPONSES, actualResponses);
+        for (var responseEntry : responses.properties()) {
+            String responseName = responseEntry.getKey();
+            JsonNode response = responseEntry.getValue();
+            JsonNode problemMediaType = response.path("content").path(APPLICATION_PROBLEM_JSON_VALUE);
+            assertHasText(response.path("description"), responseName + " description");
+            assertEquals("#/components/schemas/ProblemDetail",
+                    problemMediaType.path("schema").path("$ref").asString());
+            assertEquals(ERROR_RESPONSE_BY_STATUS.entrySet().stream()
+                            .filter(entry -> entry.getValue().equals(responseName))
+                            .map(Map.Entry::getKey)
+                            .findFirst()
+                            .orElseThrow(),
+                    problemMediaType.path("example").path("status").asString());
+            assertHasText(problemMediaType.path("example").path("detail"), responseName + " example detail");
         }
     }
 
@@ -214,12 +261,12 @@ class OpenApiContractIntegrationTest {
     }
 
     private static void assertHasText(JsonNode node, String location) {
-        assertTrue(node.isTextual() && !node.textValue().isBlank(), () -> location + " must be documented");
+        assertTrue(node.isString() && !node.asString().isBlank(), () -> location + " must be documented");
     }
 
     private static boolean isRequired(JsonNode schema, String propertyName) {
         for (JsonNode requiredProperty : schema.path("required")) {
-            if (propertyName.equals(requiredProperty.textValue())) {
+            if (propertyName.equals(requiredProperty.asString())) {
                 return true;
             }
         }
@@ -228,7 +275,7 @@ class OpenApiContractIntegrationTest {
 
     private static Set<String> textValues(JsonNode array) {
         return StreamSupport.stream(array.spliterator(), false)
-                .map(JsonNode::textValue)
+                .map(JsonNode::asString)
                 .collect(Collectors.toSet());
     }
 }

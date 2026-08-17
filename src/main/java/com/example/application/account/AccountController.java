@@ -11,7 +11,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ProblemDetail;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,7 +22,6 @@ import java.util.UUID;
 
 import static com.example.application.api.WebApiConfig.API_V1;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static org.springframework.http.MediaType.APPLICATION_PROBLEM_JSON_VALUE;
 
 @RestController
 @RequestMapping(path = "/api/v{version}/accounts", version = API_V1, produces = APPLICATION_JSON_VALUE)
@@ -39,15 +37,9 @@ public class AccountController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Authenticated account",
                     content = @Content(schema = @Schema(implementation = AccountResponse.class))),
-            @ApiResponse(responseCode = "401", description = "Bearer authentication is missing or rejected",
-                    content = @Content(mediaType = APPLICATION_PROBLEM_JSON_VALUE,
-                            schema = @Schema(implementation = ProblemDetail.class))),
-            @ApiResponse(responseCode = "404", description = "The mapped account no longer exists",
-                    content = @Content(mediaType = APPLICATION_PROBLEM_JSON_VALUE,
-                            schema = @Schema(implementation = ProblemDetail.class))),
-            @ApiResponse(responseCode = "500", description = "Unexpected server error",
-                    content = @Content(mediaType = APPLICATION_PROBLEM_JSON_VALUE,
-                            schema = @Schema(implementation = ProblemDetail.class)))
+            @ApiResponse(responseCode = "401", ref = "#/components/responses/Unauthorized"),
+            @ApiResponse(responseCode = "404", ref = "#/components/responses/NotFound"),
+            @ApiResponse(responseCode = "500", ref = "#/components/responses/InternalServerError")
     })
     public AccountResponse me(@AuthenticationPrincipal CustomUserDetails principal) {
         return service.getResponse(principal.accountId());
@@ -60,21 +52,11 @@ public class AccountController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Requested account",
                     content = @Content(schema = @Schema(implementation = AccountResponse.class))),
-            @ApiResponse(responseCode = "400", description = "The account identifier is malformed",
-                    content = @Content(mediaType = APPLICATION_PROBLEM_JSON_VALUE,
-                            schema = @Schema(implementation = ProblemDetail.class))),
-            @ApiResponse(responseCode = "401", description = "Bearer authentication is missing or rejected",
-                    content = @Content(mediaType = APPLICATION_PROBLEM_JSON_VALUE,
-                            schema = @Schema(implementation = ProblemDetail.class))),
-            @ApiResponse(responseCode = "403", description = "The caller cannot read the requested account",
-                    content = @Content(mediaType = APPLICATION_PROBLEM_JSON_VALUE,
-                            schema = @Schema(implementation = ProblemDetail.class))),
-            @ApiResponse(responseCode = "404", description = "The requested account does not exist",
-                    content = @Content(mediaType = APPLICATION_PROBLEM_JSON_VALUE,
-                            schema = @Schema(implementation = ProblemDetail.class))),
-            @ApiResponse(responseCode = "500", description = "Unexpected server error",
-                    content = @Content(mediaType = APPLICATION_PROBLEM_JSON_VALUE,
-                            schema = @Schema(implementation = ProblemDetail.class)))
+            @ApiResponse(responseCode = "400", ref = "#/components/responses/BadRequest"),
+            @ApiResponse(responseCode = "401", ref = "#/components/responses/Unauthorized"),
+            @ApiResponse(responseCode = "403", ref = "#/components/responses/Forbidden"),
+            @ApiResponse(responseCode = "404", ref = "#/components/responses/NotFound"),
+            @ApiResponse(responseCode = "500", ref = "#/components/responses/InternalServerError")
     })
     public AccountResponse get(
             @Parameter(hidden = true) @SuppressWarnings("unused")

@@ -11,7 +11,6 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ProblemDetail;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,7 +18,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import static com.example.application.api.WebApiConfig.API_V1;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static org.springframework.http.MediaType.APPLICATION_PROBLEM_JSON_VALUE;
 
 @RestController
 @RequestMapping(path = "/api/v{version}/ai", version = API_V1, produces = APPLICATION_JSON_VALUE)
@@ -35,21 +33,11 @@ public class AiController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Generated text",
                     content = @Content(schema = @Schema(implementation = GenerateResponse.class))),
-            @ApiResponse(responseCode = "400", description = "The prompt is blank, malformed, or too long",
-                    content = @Content(mediaType = APPLICATION_PROBLEM_JSON_VALUE,
-                            schema = @Schema(implementation = ProblemDetail.class))),
-            @ApiResponse(responseCode = "401", description = "Bearer authentication is missing or rejected",
-                    content = @Content(mediaType = APPLICATION_PROBLEM_JSON_VALUE,
-                            schema = @Schema(implementation = ProblemDetail.class))),
-            @ApiResponse(responseCode = "415", description = "The request body is not JSON",
-                    content = @Content(mediaType = APPLICATION_PROBLEM_JSON_VALUE,
-                            schema = @Schema(implementation = ProblemDetail.class))),
-            @ApiResponse(responseCode = "503", description = "AI is disabled or the provider is unavailable",
-                    content = @Content(mediaType = APPLICATION_PROBLEM_JSON_VALUE,
-                            schema = @Schema(implementation = ProblemDetail.class))),
-            @ApiResponse(responseCode = "500", description = "Unexpected server error",
-                    content = @Content(mediaType = APPLICATION_PROBLEM_JSON_VALUE,
-                            schema = @Schema(implementation = ProblemDetail.class)))
+            @ApiResponse(responseCode = "400", ref = "#/components/responses/BadRequest"),
+            @ApiResponse(responseCode = "401", ref = "#/components/responses/Unauthorized"),
+            @ApiResponse(responseCode = "415", ref = "#/components/responses/UnsupportedMediaType"),
+            @ApiResponse(responseCode = "503", ref = "#/components/responses/ServiceUnavailable"),
+            @ApiResponse(responseCode = "500", ref = "#/components/responses/InternalServerError")
     })
     public GenerateResponse generate(@Valid @RequestBody GenerateRequest request) {
         return aiService.generate(request.prompt());

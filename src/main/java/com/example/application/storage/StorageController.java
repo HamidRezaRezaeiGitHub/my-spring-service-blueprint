@@ -14,7 +14,6 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ProblemDetail;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,7 +28,6 @@ import java.util.UUID;
 
 import static com.example.application.api.WebApiConfig.API_V1;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static org.springframework.http.MediaType.APPLICATION_PROBLEM_JSON_VALUE;
 
 @RestController
 @RequestMapping(path = "/api/v{version}/storage", version = API_V1, produces = APPLICATION_JSON_VALUE)
@@ -45,21 +43,11 @@ public class StorageController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Pending file and signed upload URL",
                     content = @Content(schema = @Schema(implementation = UploadUrlResponse.class))),
-            @ApiResponse(responseCode = "400", description = "Upload metadata is invalid or exceeds configured limits",
-                    content = @Content(mediaType = APPLICATION_PROBLEM_JSON_VALUE,
-                            schema = @Schema(implementation = ProblemDetail.class))),
-            @ApiResponse(responseCode = "401", description = "Bearer authentication is missing or rejected",
-                    content = @Content(mediaType = APPLICATION_PROBLEM_JSON_VALUE,
-                            schema = @Schema(implementation = ProblemDetail.class))),
-            @ApiResponse(responseCode = "415", description = "The request body is not JSON",
-                    content = @Content(mediaType = APPLICATION_PROBLEM_JSON_VALUE,
-                            schema = @Schema(implementation = ProblemDetail.class))),
-            @ApiResponse(responseCode = "503", description = "Object storage is disabled or unavailable",
-                    content = @Content(mediaType = APPLICATION_PROBLEM_JSON_VALUE,
-                            schema = @Schema(implementation = ProblemDetail.class))),
-            @ApiResponse(responseCode = "500", description = "Unexpected server error",
-                    content = @Content(mediaType = APPLICATION_PROBLEM_JSON_VALUE,
-                            schema = @Schema(implementation = ProblemDetail.class)))
+            @ApiResponse(responseCode = "400", ref = "#/components/responses/BadRequest"),
+            @ApiResponse(responseCode = "401", ref = "#/components/responses/Unauthorized"),
+            @ApiResponse(responseCode = "415", ref = "#/components/responses/UnsupportedMediaType"),
+            @ApiResponse(responseCode = "503", ref = "#/components/responses/ServiceUnavailable"),
+            @ApiResponse(responseCode = "500", ref = "#/components/responses/InternalServerError")
     })
     public UploadUrlResponse createUpload(@Parameter(hidden = true) @AuthenticationPrincipal CustomUserDetails principal,
                                           @Valid @RequestBody CreateUploadRequest request) {
@@ -72,24 +60,12 @@ public class StorageController {
             description = "Verifies that the authenticated owner's provider object exists before enabling downloads.")
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Upload verified and marked complete"),
-            @ApiResponse(responseCode = "400", description = "The file identifier is malformed",
-                    content = @Content(mediaType = APPLICATION_PROBLEM_JSON_VALUE,
-                            schema = @Schema(implementation = ProblemDetail.class))),
-            @ApiResponse(responseCode = "401", description = "Bearer authentication is missing or rejected",
-                    content = @Content(mediaType = APPLICATION_PROBLEM_JSON_VALUE,
-                            schema = @Schema(implementation = ProblemDetail.class))),
-            @ApiResponse(responseCode = "404", description = "No file owned by the caller has this identifier",
-                    content = @Content(mediaType = APPLICATION_PROBLEM_JSON_VALUE,
-                            schema = @Schema(implementation = ProblemDetail.class))),
-            @ApiResponse(responseCode = "409", description = "The provider object is not yet available",
-                    content = @Content(mediaType = APPLICATION_PROBLEM_JSON_VALUE,
-                            schema = @Schema(implementation = ProblemDetail.class))),
-            @ApiResponse(responseCode = "503", description = "Object storage is disabled or unavailable",
-                    content = @Content(mediaType = APPLICATION_PROBLEM_JSON_VALUE,
-                            schema = @Schema(implementation = ProblemDetail.class))),
-            @ApiResponse(responseCode = "500", description = "Unexpected server error",
-                    content = @Content(mediaType = APPLICATION_PROBLEM_JSON_VALUE,
-                            schema = @Schema(implementation = ProblemDetail.class)))
+            @ApiResponse(responseCode = "400", ref = "#/components/responses/BadRequest"),
+            @ApiResponse(responseCode = "401", ref = "#/components/responses/Unauthorized"),
+            @ApiResponse(responseCode = "404", ref = "#/components/responses/NotFound"),
+            @ApiResponse(responseCode = "409", ref = "#/components/responses/Conflict"),
+            @ApiResponse(responseCode = "503", ref = "#/components/responses/ServiceUnavailable"),
+            @ApiResponse(responseCode = "500", ref = "#/components/responses/InternalServerError")
     })
     public void completeUpload(@Parameter(hidden = true) @AuthenticationPrincipal CustomUserDetails principal,
                                @Parameter(description = "Pending file identifier", required = true,
@@ -103,24 +79,12 @@ public class StorageController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Signed download URL",
                     content = @Content(schema = @Schema(implementation = DownloadUrlResponse.class))),
-            @ApiResponse(responseCode = "400", description = "The file identifier is malformed",
-                    content = @Content(mediaType = APPLICATION_PROBLEM_JSON_VALUE,
-                            schema = @Schema(implementation = ProblemDetail.class))),
-            @ApiResponse(responseCode = "401", description = "Bearer authentication is missing or rejected",
-                    content = @Content(mediaType = APPLICATION_PROBLEM_JSON_VALUE,
-                            schema = @Schema(implementation = ProblemDetail.class))),
-            @ApiResponse(responseCode = "404", description = "No file owned by the caller has this identifier",
-                    content = @Content(mediaType = APPLICATION_PROBLEM_JSON_VALUE,
-                            schema = @Schema(implementation = ProblemDetail.class))),
-            @ApiResponse(responseCode = "409", description = "The upload is incomplete or the provider object is missing",
-                    content = @Content(mediaType = APPLICATION_PROBLEM_JSON_VALUE,
-                            schema = @Schema(implementation = ProblemDetail.class))),
-            @ApiResponse(responseCode = "503", description = "Object storage is disabled or unavailable",
-                    content = @Content(mediaType = APPLICATION_PROBLEM_JSON_VALUE,
-                            schema = @Schema(implementation = ProblemDetail.class))),
-            @ApiResponse(responseCode = "500", description = "Unexpected server error",
-                    content = @Content(mediaType = APPLICATION_PROBLEM_JSON_VALUE,
-                            schema = @Schema(implementation = ProblemDetail.class)))
+            @ApiResponse(responseCode = "400", ref = "#/components/responses/BadRequest"),
+            @ApiResponse(responseCode = "401", ref = "#/components/responses/Unauthorized"),
+            @ApiResponse(responseCode = "404", ref = "#/components/responses/NotFound"),
+            @ApiResponse(responseCode = "409", ref = "#/components/responses/Conflict"),
+            @ApiResponse(responseCode = "503", ref = "#/components/responses/ServiceUnavailable"),
+            @ApiResponse(responseCode = "500", ref = "#/components/responses/InternalServerError")
     })
     public DownloadUrlResponse download(@Parameter(hidden = true) @AuthenticationPrincipal CustomUserDetails principal,
                                         @Parameter(description = "Verified file identifier", required = true,

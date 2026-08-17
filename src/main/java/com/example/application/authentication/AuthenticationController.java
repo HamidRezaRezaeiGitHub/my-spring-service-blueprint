@@ -14,12 +14,10 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ProblemDetail;
 import org.springframework.web.bind.annotation.*;
 
 import static com.example.application.api.WebApiConfig.API_V1;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static org.springframework.http.MediaType.APPLICATION_PROBLEM_JSON_VALUE;
 
 @RestController
 @RequestMapping(path = "/api/v{version}/auth", version = API_V1, produces = APPLICATION_JSON_VALUE)
@@ -38,21 +36,11 @@ public class AuthenticationController {
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Account registered",
                     content = @Content(schema = @Schema(implementation = AccountResponse.class))),
-            @ApiResponse(responseCode = "400", description = "The request body or Bearer header is invalid",
-                    content = @Content(mediaType = APPLICATION_PROBLEM_JSON_VALUE,
-                            schema = @Schema(implementation = ProblemDetail.class))),
-            @ApiResponse(responseCode = "401", description = "The external identity token is rejected",
-                    content = @Content(mediaType = APPLICATION_PROBLEM_JSON_VALUE,
-                            schema = @Schema(implementation = ProblemDetail.class))),
-            @ApiResponse(responseCode = "409", description = "The external identity is already registered",
-                    content = @Content(mediaType = APPLICATION_PROBLEM_JSON_VALUE,
-                            schema = @Schema(implementation = ProblemDetail.class))),
-            @ApiResponse(responseCode = "415", description = "The request body is not JSON",
-                    content = @Content(mediaType = APPLICATION_PROBLEM_JSON_VALUE,
-                            schema = @Schema(implementation = ProblemDetail.class))),
-            @ApiResponse(responseCode = "500", description = "Unexpected server error",
-                    content = @Content(mediaType = APPLICATION_PROBLEM_JSON_VALUE,
-                            schema = @Schema(implementation = ProblemDetail.class)))
+            @ApiResponse(responseCode = "400", ref = "#/components/responses/BadRequest"),
+            @ApiResponse(responseCode = "401", ref = "#/components/responses/Unauthorized"),
+            @ApiResponse(responseCode = "409", ref = "#/components/responses/Conflict"),
+            @ApiResponse(responseCode = "415", ref = "#/components/responses/UnsupportedMediaType"),
+            @ApiResponse(responseCode = "500", ref = "#/components/responses/InternalServerError")
     })
     public AccountResponse register(
             @Parameter(hidden = true) @RequestHeader(HttpHeaders.AUTHORIZATION) String authorization,
