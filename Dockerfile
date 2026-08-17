@@ -26,6 +26,12 @@ FROM maven:3.9-eclipse-temurin-25 AS build
 ENV MAVEN_CONFIG=""
 WORKDIR /workspace
 
+# The script-only Maven wrapper falls back from the configured ZIP to a tarball
+# when unzip is absent. Install unzip so the pinned ZIP checksum is verified.
+RUN apt-get update \
+ && apt-get install --yes --no-install-recommends unzip \
+ && rm -rf /var/lib/apt/lists/*
+
 # Cache dependencies — copy POM first so changes to source don't bust the cache.
 COPY pom.xml .
 COPY .mvn .mvn

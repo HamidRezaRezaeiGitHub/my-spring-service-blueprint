@@ -8,6 +8,10 @@ last_updated: 2026-08-17
 
 # Wiki Log
 
+## [2026-08-17] update | Generated OpenAPI completeness and local requirements
+
+Documented the generated-contract quality gate for operations, schemas, media types, errors, and internal-type exclusions. Clarified that ignored requirement workspaces are linted locally rather than by GitHub Actions.
+
 ## [2026-08-17] update | Review-driven API and entity conventions
 
 Documented API response boundaries, RFC 9457 errors, entity UUID/audit semantics, non-disableable security, provider identity terms, storage completion, architecture tests, validated configuration, and template adoption.

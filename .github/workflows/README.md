@@ -1,7 +1,7 @@
 # Workflows
 
-- `ci.yml` runs the PostgreSQL-backed test suite, packages the executable JAR, lints the wiki, and builds the credential-free image.
-- `security.yml` fails when OWASP Dependency Check reaches the configured CVSS threshold.
+- `ci.yml` runs the PostgreSQL-backed test suite and architecture rules, packages the executable JAR, lints the tracked wiki, and builds the credential-free image.
+- `security.yml` fails when OWASP Dependency Check reaches the configured CVSS threshold; it runs for Maven changes and on the weekly schedule.
 - `deploy-dev.yml` optionally builds one immutable image from a successful CI commit and deploys it to DEV.
 - `deploy-uat.yml` promotes that existing image tag to UAT or production without rebuilding.
 

@@ -8,7 +8,7 @@ last_updated: 2026-08-17
 
 # CI and CD
 
-CI runs the full Docker-backed Maven test suite, including ArchUnit boundaries, packages the application, discovers the resulting executable JAR without hard-coded filenames, lints the wiki and requirement workspaces, and builds the container image. Dependency vulnerability thresholds run when Maven dependencies change and on the weekly schedule. Dependabot covers Maven, Docker, and GitHub Actions; the Maven wrapper verifies its downloaded distribution checksum.
+CI runs the full Docker-backed Maven test suite, including ArchUnit boundaries, packages the application, discovers the resulting executable JAR without hard-coded filenames, lints the tracked wiki, and builds the container image. Requirement workspaces remain ignored local planning artifacts and are linted only during local work. Dependency vulnerability thresholds run when Maven dependencies change and on the weekly schedule. Dependabot covers Maven, Docker, and GitHub Actions; the Maven wrapper verifies its downloaded distribution checksum.
 
 Deployment is an optional Google Cloud Run adapter. DEV builds one image tagged with the tested commit SHA. UAT promotes that existing immutable tag rather than rebuilding it. All project, region, repository, service, identity, database, and secret names come from GitHub Environment variables.
 

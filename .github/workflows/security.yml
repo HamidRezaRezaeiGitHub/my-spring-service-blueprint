@@ -1,6 +1,16 @@
 name: Dependency Security
 
 on:
+  pull_request:
+    branches: [master]
+    paths:
+      - pom.xml
+      - .github/workflows/security.yml
+  push:
+    branches: [master]
+    paths:
+      - pom.xml
+      - .github/workflows/security.yml
   schedule:
     - cron: '0 2 * * 0'
   workflow_dispatch:
