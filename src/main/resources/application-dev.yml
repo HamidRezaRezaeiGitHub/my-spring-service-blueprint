@@ -26,8 +26,6 @@ app:
   firebase:
     enabled: ${FIREBASE_ENABLED:false}
     service-account-key-path: ${FIREBASE_SERVICE_ACCOUNT_KEY_PATH:}
-  security:
-    enabled: true
   storage:
     provider: ${STORAGE_PROVIDER:noop}
     bucket: ${STORAGE_BUCKET:}
