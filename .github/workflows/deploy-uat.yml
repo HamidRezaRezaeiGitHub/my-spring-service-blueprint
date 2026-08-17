@@ -19,10 +19,40 @@ permissions:
 
 jobs:
   promote:
+    if: vars.GCP_DEPLOYMENT_ENABLED == 'true'
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
 
     steps:
+      - name: Validate deployment template configuration
+        shell: bash
+        env:
+          WORKLOAD_IDENTITY_PROVIDER: ${{ vars.WORKLOAD_IDENTITY_PROVIDER }}
+          DEPLOY_SERVICE_ACCOUNT: ${{ vars.DEPLOY_SERVICE_ACCOUNT }}
+          ARTIFACT_REGISTRY_HOST: ${{ vars.ARTIFACT_REGISTRY_HOST }}
+          ARTIFACT_PROJECT_ID: ${{ vars.ARTIFACT_PROJECT_ID }}
+          GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+          GCP_REGION: ${{ vars.GCP_REGION }}
+          ARTIFACT_REPOSITORY: ${{ vars.ARTIFACT_REPOSITORY }}
+          CONTAINER_IMAGE: ${{ vars.CONTAINER_IMAGE }}
+          CLOUD_RUN_SERVICE: ${{ vars.CLOUD_RUN_SERVICE }}
+          CLOUD_RUN_RUNTIME_SERVICE_ACCOUNT: ${{ vars.CLOUD_RUN_RUNTIME_SERVICE_ACCOUNT }}
+          DB_URL: ${{ vars.DB_URL }}
+          DB_USERNAME: ${{ vars.DB_USERNAME }}
+          DB_PASSWORD_SECRET: ${{ vars.DB_PASSWORD_SECRET }}
+        run: |
+          missing=()
+          for name in WORKLOAD_IDENTITY_PROVIDER DEPLOY_SERVICE_ACCOUNT ARTIFACT_REGISTRY_HOST \
+            ARTIFACT_PROJECT_ID GCP_PROJECT_ID GCP_REGION ARTIFACT_REPOSITORY CONTAINER_IMAGE CLOUD_RUN_SERVICE \
+            CLOUD_RUN_RUNTIME_SERVICE_ACCOUNT \
+            DB_URL DB_USERNAME DB_PASSWORD_SECRET; do
+            [[ -n "${!name}" ]] || missing+=("$name")
+          done
+          if (( ${#missing[@]} )); then
+            echo "Missing GitHub Environment variables: ${missing[*]}" >&2
+            exit 1
+          fi
+
       - uses: google-github-actions/auth@v3
         with:
           workload_identity_provider: ${{ vars.WORKLOAD_IDENTITY_PROVIDER }}
@@ -33,12 +63,13 @@ jobs:
       - name: Deploy existing image without rebuilding
         shell: bash
         env:
-          IMAGE: ${{ vars.ARTIFACT_REGISTRY_HOST }}/${{ vars.GCP_PROJECT_ID }}/${{ vars.ARTIFACT_REPOSITORY }}/${{ vars.CONTAINER_IMAGE }}:${{ inputs.image_sha }}
+          IMAGE: ${{ vars.ARTIFACT_REGISTRY_HOST }}/${{ vars.ARTIFACT_PROJECT_ID }}/${{ vars.ARTIFACT_REPOSITORY }}/${{ vars.CONTAINER_IMAGE }}:${{ inputs.image_sha }}
         run: >-
           gcloud run deploy "${{ vars.CLOUD_RUN_SERVICE }}"
           --image="$IMAGE"
           --project="${{ vars.GCP_PROJECT_ID }}"
           --region="${{ vars.GCP_REGION }}"
+          --service-account="${{ vars.CLOUD_RUN_RUNTIME_SERVICE_ACCOUNT }}"
           --set-env-vars="SPRING_PROFILES_ACTIVE=${{ inputs.environment }},DB_URL=${{ vars.DB_URL }},DB_USERNAME=${{ vars.DB_USERNAME }}"
           --set-secrets="DB_PASSWORD=${{ vars.DB_PASSWORD_SECRET }}:latest"
           --quiet

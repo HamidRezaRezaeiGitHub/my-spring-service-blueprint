@@ -44,4 +44,6 @@ The full test suite uses Testcontainers PostgreSQL 18 and therefore requires Doc
 
 Never commit credentials or bake them into an image. See [configuration](wiki/operations/configuration.md) and [security/providers](wiki/security/providers.md).
 
+The Google Cloud deployment workflows are adoption templates and remain skipped until the repository variable `GCP_DEPLOYMENT_ENABLED=true` is set after the target environments are configured.
+
 REST errors use Spring's RFC 9457 `ProblemDetail` contract. Controllers return explicit response records rather than serializing JPA entities; see [API contracts](wiki/guides/api-contracts.md).

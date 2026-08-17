@@ -8,6 +8,10 @@ last_updated: 2026-08-17
 
 # Wiki Log
 
+## [2026-08-17] update | Reusable API responses and opt-in deployment
+
+Centralized generic RFC 9457 OpenAPI responses without adding documentation-only endpoints, established an onboarding-oriented Swagger tag order, recorded local startup-warning fixes, and made the GCP deployment templates explicitly opt-in with configuration preflight checks.
+
 ## [2026-08-17] update | Generated OpenAPI completeness and local requirements
 
 Documented the generated-contract quality gate for operations, schemas, media types, errors, and internal-type exclusions. Clarified that ignored requirement workspaces are linted locally rather than by GitHub Actions.
