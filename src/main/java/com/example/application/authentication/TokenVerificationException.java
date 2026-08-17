@@ -1,4 +1,4 @@
-package com.example.application.authentication.exception;
+package com.example.application.authentication;
 
 public class TokenVerificationException extends RuntimeException {
     public TokenVerificationException(String message) {

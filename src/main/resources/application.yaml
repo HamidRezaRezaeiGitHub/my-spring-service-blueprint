@@ -1,6 +1,10 @@
 spring:
   application:
     name: my-spring-service-blueprint
+  autoconfigure:
+    exclude:
+      # This API authenticates exclusively through its provider-backed Bearer filter.
+      - org.springframework.boot.security.autoconfigure.UserDetailsServiceAutoConfiguration
   jpa:
     hibernate:
       ddl-auto: validate
@@ -19,6 +23,18 @@ spring:
     mcp:
       server:
         enabled: false
+        # Tool callbacks are registered explicitly; the reflective scanner is redundant and noisy when MCP is off.
+        annotation-scanner:
+          enabled: false
+
+springdoc:
+  # Local API documentation is intentionally enabled; cloud profiles can override these values.
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+    # Keep resource routing aligned with the explicitly patched Swagger UI WebJar in pom.xml.
+    version: 5.32.13
 
 app:
   ai:
@@ -27,8 +43,6 @@ app:
     provider: noop
   firebase:
     enabled: false
-  security:
-    enabled: true
   storage:
     provider: noop
     max-file-size: 10485760

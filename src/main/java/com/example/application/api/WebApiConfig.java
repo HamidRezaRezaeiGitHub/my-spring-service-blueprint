@@ -1,12 +1,12 @@
 package com.example.application.api;
 
-import java.util.function.Predicate;
-import java.util.regex.Pattern;
-
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.server.RequestPath;
 import org.springframework.web.servlet.config.annotation.ApiVersionConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+import java.util.function.Predicate;
+import java.util.regex.Pattern;
 
 /**
  * Spring 7 API versioning configuration.
@@ -63,23 +63,11 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class WebApiConfig implements WebMvcConfigurer {
 
-    /** First migrated version of the public REST API. */
     public static final String API_V1 = "1";
 
-    /**
-     * Path-segment versioning only applies to URLs of the form {@code /api/v{N}/...} where
-     * {@code N} is one or more digits. All other requests bypass version resolution entirely
-     * (the segment is not parsed as a version), so unversioned endpoints such as
-     * {@code /mcp} and {@code /actuator/*} continue to work unchanged.
-     *
-     * <p>The captured segment is the literal {@code v{N}} token; Spring's default
-     * {@code SemanticApiVersionParser} strips the leading {@code v}, yielding the version
-     * number {@code N} (e.g. {@code "v1" → "1"}).
-     */
     private static final Pattern VERSIONED_API_PATH = Pattern.compile("^/api/v\\d+(/.*)?$");
 
-    private static final Predicate<RequestPath> VERSIONED_API_PREDICATE =
-            path -> VERSIONED_API_PATH.matcher(path.value()).matches();
+    private static final Predicate<RequestPath> VERSIONED_API_PREDICATE = path -> VERSIONED_API_PATH.matcher(path.value()).matches();
 
     @Override
     public void configureApiVersioning(ApiVersionConfigurer configurer) {

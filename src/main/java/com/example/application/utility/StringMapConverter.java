@@ -13,7 +13,7 @@ import java.util.Map;
 @Converter
 public class StringMapConverter implements AttributeConverter<Map<String, String>, String> {
 
-    private static final JsonMapper OBJECT_MAPPER = JsonMapper.builder().build();
+    private static final JsonMapper JSON_MAPPER = JsonMapper.builder().build();
 
     @Override
     public @Nullable String convertToDatabaseColumn(@Nullable Map<String, String> attribute) {
@@ -21,7 +21,7 @@ public class StringMapConverter implements AttributeConverter<Map<String, String
             return null;
         }
         try {
-            return OBJECT_MAPPER.writeValueAsString(attribute);
+            return JSON_MAPPER.writeValueAsString(attribute);
         } catch (JacksonException e) {
             throw new IllegalArgumentException("Failed to convert map to JSON string", e);
         }
@@ -33,7 +33,7 @@ public class StringMapConverter implements AttributeConverter<Map<String, String
             return Collections.emptyMap();
         }
         try {
-            return OBJECT_MAPPER.readValue(dbData, new TypeReference<>() {
+            return JSON_MAPPER.readValue(dbData, new TypeReference<>() {
             });
         } catch (JacksonException e) {
             throw new IllegalArgumentException("Failed to convert JSON string to map", e);

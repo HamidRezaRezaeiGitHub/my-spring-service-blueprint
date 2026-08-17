@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.4.xsd"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.4.xsd
+                                  https://dependency-check.github.io/DependencyCheck/dependency-suppression.1.4.xsd">
+    <suppress>
+        <notes><![CDATA[
+        CVE-2026-53914 affects org.jetbrains.kotlin:kotlin-gradle-plugin build-cache
+        deserialization before 2.4.20-Beta1. Dependency-Check incorrectly maps the
+        product-wide Kotlin CPE to unrelated Kotlin runtime artifacts.
+        Reviewed advisory: https://github.com/advisories/GHSA-r937-wjx7-w2jp
+        ]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.jetbrains\.kotlin/kotlin-(?:reflect|stdlib(?:-common|-jdk7|-jdk8)?)@.*$</packageUrl>
+        <vulnerabilityName>CVE-2026-53914</vulnerabilityName>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+        CVE-2020-29582 affects org.jetbrains.kotlin:kotlin-stdlib through 1.4.20.
+        Dependency-Check incorrectly maps it to kotlin-stdlib-common 1.9.10.
+        Reviewed advisory: https://github.com/advisories/GHSA-cqj8-47ch-rvvq
+        ]]></notes>
+        <packageUrl>pkg:maven/org.jetbrains.kotlin/kotlin-stdlib-common@1.9.10</packageUrl>
+        <vulnerabilityName>CVE-2020-29582</vulnerabilityName>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+        These CVEs affect Android SDK native image parsing and dexdump, not the
+        test-scoped Maven repackage of Android's org.json implementation.
+        ]]></notes>
+        <packageUrl>pkg:maven/com.vaadin.external.google/android-json@0.0.20131108.vaadin1</packageUrl>
+        <vulnerabilityName>CVE-2008-0986</vulnerabilityName>
+        <vulnerabilityName>CVE-2011-1001</vulnerabilityName>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+        CVE-2026-66299 exists only in Tomcat's deployable WebSocket chat example.
+        The embedded Maven artifacts do not contain that example application.
+        Apache advisory: https://tomcat.apache.org/security-11.html#Fixed_in_Apache_Tomcat_11.0.25
+        ]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.apache\.tomcat\.embed/tomcat-embed-(?:core|websocket)@.*$</packageUrl>
+        <vulnerabilityName>CVE-2026-66299</vulnerabilityName>
+    </suppress>
+</suppressions>

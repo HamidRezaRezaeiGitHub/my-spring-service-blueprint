@@ -1,11 +1,7 @@
 package com.example.application.filtering;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.jspecify.annotations.Nullable;
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -14,12 +10,12 @@ import java.time.Instant;
 import static org.springframework.format.annotation.DateTimeFormat.ISO;
 
 /**
- * Reusable audit-date range filter for {@code UpdatableEntity}-based entities that also serves as the
+ * Reusable audit-date range filter for auditable entities that also serves as the
  * Spring MVC request parameter object.
  * <p>
  * Spring binds each flat query parameter to a nullable {@link Instant} using explicit ISO-8601
  * date-time formatting, so malformed or timezone-less values are rejected at the web boundary with a
- * structured 400 rather than being silently ignored. Bound via {@code @ModelAttribute}; flattened into
+ * RFC 9457 400 response rather than being silently ignored. Bound via {@code @ModelAttribute}; flattened into
  * four independent flat query parameters in the generated OpenAPI schema via {@code @ParameterObject}.
  * Range ordering is enforced by {@link ValidDateFilterRanges}.
  * <p>

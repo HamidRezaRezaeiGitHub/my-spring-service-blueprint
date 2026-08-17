@@ -24,10 +24,16 @@
       "description": "Runtime-mounted Firebase service-account resource. Never commit the credential file."
     },
     {
-      "name": "app.security.enabled",
-      "type": "java.lang.Boolean",
-      "description": "Enables the stateless Bearer security policy.",
-      "defaultValue": true
+      "name": "app.firebase.connect-timeout-ms",
+      "type": "java.lang.Integer",
+      "description": "Firebase SDK connection timeout in milliseconds; must be between 1 and 120000.",
+      "defaultValue": 5000
+    },
+    {
+      "name": "app.firebase.read-timeout-ms",
+      "type": "java.lang.Integer",
+      "description": "Firebase SDK read timeout in milliseconds; must be between 1 and 120000.",
+      "defaultValue": 10000
     },
     {
       "name": "app.storage.provider",
@@ -45,6 +51,17 @@
       "type": "java.lang.Long",
       "description": "Maximum signed-upload content length in bytes.",
       "defaultValue": 10485760
+    },
+    {
+      "name": "app.storage.signed-url-duration",
+      "type": "java.time.Duration",
+      "description": "Signed URL lifetime between one second and seven days.",
+      "defaultValue": "15m"
+    },
+    {
+      "name": "app.observability.gcp-project-id",
+      "type": "java.lang.String",
+      "description": "Optional Google Cloud project used to qualify trace identifiers in structured logs."
     }
   ]
 }

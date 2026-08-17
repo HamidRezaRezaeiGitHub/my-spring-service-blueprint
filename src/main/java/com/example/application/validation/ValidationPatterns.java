@@ -1,7 +1,5 @@
 package com.example.application.validation;
 
-import org.jspecify.annotations.NullMarked;
-
 /**
  * Centralised regex pattern constants shared across request, response, and DTO classes.
  * <p>
@@ -12,7 +10,6 @@ import org.jspecify.annotations.NullMarked;
  * @Pattern(regexp = NON_BLANK_IF_PRESENT_PATTERN, message = "...")
  * }</pre>
  */
-@NullMarked
 public final class ValidationPatterns {
 
     private ValidationPatterns() {

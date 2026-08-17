@@ -37,11 +37,7 @@ import java.util.function.Function;
  */
 public final class PagedResponseBuilder {
 
-    /**
-     * Private constructor to prevent instantiation.
-     */
     private PagedResponseBuilder() {
-        throw new UnsupportedOperationException("Utility class cannot be instantiated");
     }
 
     /**

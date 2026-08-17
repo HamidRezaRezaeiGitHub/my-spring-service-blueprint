@@ -1,6 +1,18 @@
 name: Dependency Security
 
 on:
+  pull_request:
+    branches: [master]
+    paths:
+      - pom.xml
+      - .github/dependency-check-suppressions.xml
+      - .github/workflows/security.yml
+  push:
+    branches: [master]
+    paths:
+      - pom.xml
+      - .github/dependency-check-suppressions.xml
+      - .github/workflows/security.yml
   schedule:
     - cron: '0 2 * * 0'
   workflow_dispatch:
@@ -21,10 +33,31 @@ jobs:
           cache: maven
 
       - name: Fail on high-severity dependency findings
-        run: >-
-          ./mvnw -B org.owasp:dependency-check-maven:check
-          -DfailBuildOnCVSS=8
-          -DskipTestScope=false
+        shell: bash
+        env:
+          NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
+        run: |
+          dependency_check_args=(
+            -B
+            org.owasp:dependency-check-maven:13.0.0:check
+            -DfailBuildOnCVSS=8
+            -DskipTestScope=false
+            -DassemblyAnalyzerEnabled=false
+            -DossIndexAnalyzerEnabled=false
+            -DsuppressionFile=.github/dependency-check-suppressions.xml
+            -DfailBuildOnUnusedSuppressionRule=true
+          )
+
+          if [[ -n "$NVD_API_KEY" ]]; then
+            dependency_check_args+=("-DnvdApiKeyEnvironmentVariable=NVD_API_KEY")
+          else
+            echo "::notice::NVD_API_KEY is not configured; using Dependency-Check's daily NVD data feed."
+            dependency_check_args+=(
+              "-DnvdDatafeedUrl=https://dependency-check.github.io/DependencyCheck_Builder/nvd_cache/nvdcve-{0}.json.gz"
+            )
+          fi
+
+          ./mvnw "${dependency_check_args[@]}"
 
       - name: Upload dependency report
         if: always()

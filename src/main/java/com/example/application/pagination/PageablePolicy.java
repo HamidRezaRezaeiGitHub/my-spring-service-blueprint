@@ -21,8 +21,12 @@ public final class PageablePolicy {
     private final Sort.Direction defaultSortDirection;
     private final String tieBreakerField;
 
-    public PageablePolicy(Set<String> allowedSortFields, String defaultSortField,
-                            Sort.Direction defaultSortDirection, String tieBreakerField) {
+    public PageablePolicy(
+            Set<String> allowedSortFields,
+            String defaultSortField,
+            Sort.Direction defaultSortDirection,
+            String tieBreakerField
+    ) {
         if (!allowedSortFields.contains(defaultSortField)) {
             throw new IllegalArgumentException("Default sort field must be client-sortable: " + defaultSortField);
         }
@@ -62,6 +66,7 @@ public final class PageablePolicy {
         sort.forEach(order -> validateSortField(order.getProperty()));
     }
 
+    @SuppressWarnings("UnusedReturnValue")
     private String validateSortField(String field) {
         String normalized = field.trim();
         if (normalized.isEmpty() || !allowedSortFields.contains(normalized)) {

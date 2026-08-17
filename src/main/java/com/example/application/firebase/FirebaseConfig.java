@@ -18,8 +18,8 @@ import java.io.IOException;
 public class FirebaseConfig {
 
     @Bean
-    GoogleCredentials firebaseCredentials(FirebaseProperties properties) throws IOException {
-        Resource resource = properties.getServiceAccountKeyPath();
+    GoogleCredentials firebaseCredentials(FirebaseProperties firebaseProperties) throws IOException {
+        Resource resource = firebaseProperties.getServiceAccountKeyPath();
         if (resource == null || !resource.exists() || !resource.isReadable()) {
             throw new IllegalStateException("app.firebase.service-account-key-path must reference a readable credential file");
         }
@@ -29,11 +29,11 @@ public class FirebaseConfig {
     }
 
     @Bean(destroyMethod = "delete")
-    FirebaseApp firebaseApp(GoogleCredentials credentials, FirebaseProperties properties) {
+    FirebaseApp firebaseApp(GoogleCredentials credentials, FirebaseProperties firebaseProperties) {
         FirebaseOptions options = FirebaseOptions.builder()
                 .setCredentials(credentials)
-                .setConnectTimeout(properties.getConnectTimeoutMs())
-                .setReadTimeout(properties.getReadTimeoutMs())
+                .setConnectTimeout(firebaseProperties.getConnectTimeoutMs())
+                .setReadTimeout(firebaseProperties.getReadTimeoutMs())
                 .build();
         return FirebaseApp.initializeApp(options, "application");
     }

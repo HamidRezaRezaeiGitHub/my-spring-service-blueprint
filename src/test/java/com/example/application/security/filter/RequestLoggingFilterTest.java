@@ -1,5 +1,6 @@
 package com.example.application.security.filter;
 
+import com.example.application.observability.CloudLoggingContextEnricher;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -18,15 +19,18 @@ class RequestLoggingFilterTest {
         HttpServletRequest request = mock(HttpServletRequest.class);
         HttpServletResponse response = mock(HttpServletResponse.class);
         FilterChain chain = mock(FilterChain.class);
+        CloudLoggingContextEnricher contextEnricher = mock(CloudLoggingContextEnricher.class);
         when(request.getMethod()).thenReturn("GET");
         when(request.getRequestURI()).thenReturn("/api/v1/accounts/me");
         when(response.getStatus()).thenReturn(200);
 
         // Act
-        new RequestLoggingFilter().doFilterInternal(request, response, chain);
+        new RequestLoggingFilter(contextEnricher).doFilterInternal(request, response, chain);
 
         // Assert
         verify(chain).doFilter(request, response);
+        verify(contextEnricher).applyTraceContext(request);
+        verify(contextEnricher).clearTraceContext();
         verify(request, never()).getQueryString();
         verify(request, never()).getHeader("Authorization");
     }

@@ -1,4 +1,4 @@
 @NullMarked
-package com.example.application.persistence.dto;
+package com.example.application;
 
 import org.jspecify.annotations.NullMarked;

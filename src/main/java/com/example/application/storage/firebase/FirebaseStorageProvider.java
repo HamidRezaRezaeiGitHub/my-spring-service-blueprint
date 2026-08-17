@@ -13,22 +13,24 @@ import java.net.URI;
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
+import static java.util.Objects.requireNonNull;
+
 @Component
 @ConditionalOnProperty(name = "app.storage.provider", havingValue = "firebase")
 public class FirebaseStorageProvider implements StorageProvider {
-    private final Storage storage;
+    private final Storage storageClient;
     private final String bucket;
 
-    public FirebaseStorageProvider(Storage storage, StorageProperties properties) {
-        this.storage = storage;
-        this.bucket = properties.getBucket();
+    public FirebaseStorageProvider(Storage storageClient, StorageProperties storageProperties) {
+        this.storageClient = storageClient;
+        this.bucket = requireNonNull(storageProperties.getBucket(), "Storage bucket must be configured");
     }
 
     @Override
     public URI createUploadUrl(String objectKey, String contentType, Duration validity) {
         try {
             BlobInfo blob = BlobInfo.newBuilder(BlobId.of(bucket, objectKey)).setContentType(contentType).build();
-            return storage.signUrl(blob, validity.toSeconds(), TimeUnit.SECONDS,
+            return storageClient.signUrl(blob, validity.toSeconds(), TimeUnit.SECONDS,
                     Storage.SignUrlOption.httpMethod(com.google.cloud.storage.HttpMethod.PUT),
                     Storage.SignUrlOption.withContentType(),
                     Storage.SignUrlOption.withV4Signature()).toURI();
@@ -41,7 +43,7 @@ public class FirebaseStorageProvider implements StorageProvider {
     public URI createDownloadUrl(String objectKey, Duration validity) {
         try {
             BlobInfo blob = BlobInfo.newBuilder(BlobId.of(bucket, objectKey)).build();
-            return storage.signUrl(blob, validity.toSeconds(), TimeUnit.SECONDS,
+            return storageClient.signUrl(blob, validity.toSeconds(), TimeUnit.SECONDS,
                     Storage.SignUrlOption.httpMethod(com.google.cloud.storage.HttpMethod.GET),
                     Storage.SignUrlOption.withV4Signature()).toURI();
         } catch (Exception exception) {
@@ -51,6 +53,6 @@ public class FirebaseStorageProvider implements StorageProvider {
 
     @Override
     public boolean exists(String objectKey) {
-        return storage.get(BlobId.of(bucket, objectKey)) != null;
+        return storageClient.get(BlobId.of(bucket, objectKey)) != null;
     }
 }

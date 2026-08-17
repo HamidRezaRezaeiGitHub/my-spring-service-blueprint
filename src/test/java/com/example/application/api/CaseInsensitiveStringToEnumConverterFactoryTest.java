@@ -6,7 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class CaseInsensitiveStringToEnumConverterFactoryTest {
-    private enum Example { FIRST_VALUE }
+
+    private enum Example {FIRST_VALUE}
 
     @Test
     void convert_shouldIgnoreCase_whenValueIsKnown() {

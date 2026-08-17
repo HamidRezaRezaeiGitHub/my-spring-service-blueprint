@@ -1,6 +1,6 @@
 package com.example.application.authentication.noop;
 
-import com.example.application.authentication.exception.TokenVerificationException;
+import com.example.application.authentication.TokenVerificationException;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;

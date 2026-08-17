@@ -1,15 +1,11 @@
 package com.example.application.storage;
 
-import com.example.application.persistence.UpdatableEntity;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import com.example.application.entity.AuditableEntity;
+import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.jspecify.annotations.Nullable;
 
 import java.util.UUID;
 
@@ -17,8 +13,10 @@ import java.util.UUID;
 @Table(name = "stored_files")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class StoredFile extends UpdatableEntity {
+public class StoredFile extends AuditableEntity {
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Nullable
     private UUID id;
 
     @Column(name = "owner_account_id", nullable = false)
@@ -40,9 +38,7 @@ public class StoredFile extends UpdatableEntity {
     @Column(nullable = false)
     private boolean uploaded;
 
-    public StoredFile(UUID ownerAccountId, StoragePurpose purpose, String objectKey,
-                      String contentType, long contentLength) {
-        this.id = UUID.randomUUID();
+    public StoredFile(UUID ownerAccountId, StoragePurpose purpose, String objectKey, String contentType, long contentLength) {
         this.ownerAccountId = ownerAccountId;
         this.purpose = purpose;
         this.objectKey = objectKey;

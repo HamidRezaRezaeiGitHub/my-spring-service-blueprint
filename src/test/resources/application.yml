@@ -30,8 +30,6 @@ app:
     provider: noop
   firebase:
     enabled: false
-  security:
-    enabled: true
   storage:
     provider: noop
     max-file-size: 10485760

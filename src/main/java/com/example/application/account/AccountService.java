@@ -2,28 +2,26 @@ package com.example.application.account;
 
 import com.example.application.account.dto.AccountResponse;
 import com.example.application.authorization.Role;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class AccountService {
 
-    private final AccountRepository accounts;
-
-    public AccountService(AccountRepository accounts) {
-        this.accounts = accounts;
-    }
+    private final AccountRepository repository;
 
     @Transactional
     public Account create(String displayName) {
-        return accounts.save(new Account(displayName, Role.MEMBER));
+        return repository.save(new Account(displayName, Role.MEMBER));
     }
 
     @Transactional(readOnly = true)
     public Account get(UUID accountId) {
-        return accounts.findById(accountId).orElseThrow(() -> new AccountNotFoundException(accountId));
+        return repository.findById(accountId).orElseThrow(() -> new AccountNotFoundException(accountId));
     }
 
     @Transactional(readOnly = true)

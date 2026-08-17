@@ -9,7 +9,7 @@ import java.time.Instant;
 /**
  * Validates that each inclusive audit-date range in {@link DateFilter} is ordered.
  * Range violations are reported against the offending {@code *Before} property so they surface as
- * field errors in the standard structured 400 response rather than as global object errors.
+ * field errors in the RFC 9457 validation response rather than as global object errors.
  */
 public class DateFilterRangesValidator implements ConstraintValidator<ValidDateFilterRanges, DateFilter> {
 

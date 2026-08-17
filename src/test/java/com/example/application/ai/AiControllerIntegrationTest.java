@@ -8,14 +8,16 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.security.test.context.support.WithMockUser;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest(properties = "app.security.enabled=false")
+@SpringBootTest
 @AutoConfigureMockMvc
 @Import(TestcontainersConfiguration.class)
+@WithMockUser
 class AiControllerIntegrationTest {
     @Autowired
     private MockMvc mvc;
@@ -34,7 +36,8 @@ class AiControllerIntegrationTest {
 
         // Assert
         result.andExpect(status().isServiceUnavailable())
-                .andExpect(jsonPath("$.errorType").value("SERVICE_UNAVAILABLE"));
+                .andExpect(jsonPath("$.status").value(503))
+                .andExpect(jsonPath("$.detail").value("AI generation is disabled"));
     }
 
     @Test
@@ -47,6 +50,7 @@ class AiControllerIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(request))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.errorType").value("VALIDATION_ERROR"));
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.errors[0]").exists());
     }
 }
