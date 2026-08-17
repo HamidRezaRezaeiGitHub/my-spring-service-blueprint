@@ -29,6 +29,11 @@ class OpenApiContractIntegrationTest {
                 .andExpect(jsonPath("$.paths['/api/v1/ai/generate'].post").exists())
                 .andExpect(jsonPath("$.paths['/api/v1/accounts/me'].get").exists())
                 .andExpect(jsonPath("$.paths['/api/v1/storage/uploads'].post").exists())
+                .andExpect(jsonPath("$.paths['/api/v1/storage/files/{fileId}/complete'].post").exists())
+                .andExpect(jsonPath("$.paths['/api/v1/auth/register'].post.security[0].bearerAuth").exists())
+                .andExpect(jsonPath("$.paths['/api/v1/ai/generate'].post.security[0].bearerAuth").exists())
+                .andExpect(jsonPath("$.paths['/api/v1/storage/uploads'].post.security[0].bearerAuth").exists())
+                .andExpect(jsonPath("$.paths['/api/v1/accounts/me'].get.security[0].bearerAuth").exists())
                 .andExpect(jsonPath("$.components.securitySchemes.bearerAuth.type").value("http"))
                 .andExpect(jsonPath("$.components.securitySchemes.bearerAuth.scheme").value("bearer"));
     }
