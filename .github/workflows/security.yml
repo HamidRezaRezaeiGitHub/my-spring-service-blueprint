@@ -31,10 +31,25 @@ jobs:
           cache: maven
 
       - name: Fail on high-severity dependency findings
-        run: >-
-          ./mvnw -B org.owasp:dependency-check-maven:check
-          -DfailBuildOnCVSS=8
-          -DskipTestScope=false
+        shell: bash
+        env:
+          NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
+        run: |
+          dependency_check_args=(
+            -B
+            org.owasp:dependency-check-maven:13.0.0:check
+            -DfailBuildOnCVSS=8
+            -DskipTestScope=false
+          )
+
+          if [[ -n "$NVD_API_KEY" ]]; then
+            dependency_check_args+=("-DnvdApiKeyEnvironmentVariable=NVD_API_KEY")
+          else
+            echo "::notice::NVD_API_KEY is not configured; using the slower public NVD rate limit."
+            dependency_check_args+=("-DnvdApiDelay=8000")
+          fi
+
+          ./mvnw "${dependency_check_args[@]}"
 
       - name: Upload dependency report
         if: always()
