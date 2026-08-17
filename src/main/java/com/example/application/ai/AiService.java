@@ -10,12 +10,12 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class AiService {
+
     private final @Nullable ChatClient chatClient;
     private final AiProperties properties;
 
     @Autowired
-    public AiService(ObjectProvider<ChatClient.Builder> chatClientBuilder, AiProperties properties,
-                     @Value("${spring.ai.model.chat:none}") String configuredChatModel) {
+    public AiService(ObjectProvider<ChatClient.Builder> chatClientBuilder, AiProperties properties, @Value("${spring.ai.model.chat:none}") String configuredChatModel) {
         ChatClient.Builder builder = "none".equalsIgnoreCase(configuredChatModel)
                 ? null
                 : chatClientBuilder.getIfAvailable();
@@ -28,7 +28,7 @@ public class AiService {
         this.properties = properties;
     }
 
-    public GenerateResponse generate(String prompt) {
+    public GenerateResponse generate(@Nullable String prompt) {
         String normalized = prompt == null ? "" : prompt.trim();
         if (normalized.isEmpty()) {
             throw new IllegalArgumentException("Prompt must not be blank");
