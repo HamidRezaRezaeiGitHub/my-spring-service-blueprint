@@ -40,13 +40,17 @@ jobs:
             org.owasp:dependency-check-maven:13.0.0:check
             -DfailBuildOnCVSS=8
             -DskipTestScope=false
+            -DassemblyAnalyzerEnabled=false
+            -DossIndexAnalyzerEnabled=false
           )
 
           if [[ -n "$NVD_API_KEY" ]]; then
             dependency_check_args+=("-DnvdApiKeyEnvironmentVariable=NVD_API_KEY")
           else
-            echo "::notice::NVD_API_KEY is not configured; using the slower public NVD rate limit."
-            dependency_check_args+=("-DnvdApiDelay=8000")
+            echo "::notice::NVD_API_KEY is not configured; using Dependency-Check's daily NVD data feed."
+            dependency_check_args+=(
+              "-DnvdDatafeedUrl=https://dependency-check.github.io/DependencyCheck_Builder/nvd_cache/nvdcve-{0}.json.gz"
+            )
           fi
 
           ./mvnw "${dependency_check_args[@]}"

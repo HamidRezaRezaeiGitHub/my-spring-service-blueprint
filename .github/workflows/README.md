@@ -1,7 +1,7 @@
 # Workflows
 
 - `ci.yml` runs the PostgreSQL-backed test suite and architecture rules, packages the executable JAR, lints the tracked wiki, and builds the credential-free image.
-- `security.yml` runs pinned OWASP Dependency Check for Maven changes and weekly, failing at the configured CVSS threshold. An optional `NVD_API_KEY` repository secret enables the higher NVD rate limit; without it, the scan uses the slower public limit.
+- `security.yml` runs pinned OWASP Dependency Check for Maven changes and weekly, failing at the configured CVSS threshold. An optional `NVD_API_KEY` repository secret enables direct NVD API updates; without it, the scan bootstraps from Dependency-Check's daily best-effort NVD data feed instead of competing for the anonymous API limit.
 - `deploy-dev.yml` is an opt-in template that builds one commit-tagged image from a successful CI commit and deploys it to DEV.
 - `deploy-uat.yml` is an opt-in template that promotes that existing image tag to UAT or production without rebuilding.
 
