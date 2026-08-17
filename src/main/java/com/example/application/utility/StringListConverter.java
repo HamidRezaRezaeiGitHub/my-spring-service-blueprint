@@ -13,7 +13,7 @@ import java.util.List;
 @Converter
 public class StringListConverter implements AttributeConverter<List<String>, String> {
 
-    private static final JsonMapper OBJECT_MAPPER = JsonMapper.builder().build();
+    private static final JsonMapper JSON_MAPPER = JsonMapper.builder().build();
 
     @Override
     public @Nullable String convertToDatabaseColumn(@Nullable List<String> attribute) {
@@ -21,7 +21,7 @@ public class StringListConverter implements AttributeConverter<List<String>, Str
             return null;
         }
         try {
-            return OBJECT_MAPPER.writeValueAsString(attribute);
+            return JSON_MAPPER.writeValueAsString(attribute);
         } catch (JacksonException e) {
             throw new IllegalArgumentException("Failed to convert list to JSON string", e);
         }
@@ -33,7 +33,7 @@ public class StringListConverter implements AttributeConverter<List<String>, Str
             return Collections.emptyList();
         }
         try {
-            return OBJECT_MAPPER.readValue(dbData, new TypeReference<>() {
+            return JSON_MAPPER.readValue(dbData, new TypeReference<>() {
             });
         } catch (JacksonException e) {
             throw new IllegalArgumentException("Failed to convert JSON string to list", e);
