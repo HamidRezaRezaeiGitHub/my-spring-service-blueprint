@@ -6,8 +6,10 @@ import org.springframework.stereotype.Component;
 
 import java.util.UUID;
 
-/** Resource-level authorization owned by the account feature. */
-@Component("accountAuthorization")
+/**
+ * Resource-level authorization owned by the account feature.
+ */
+@Component
 public class AccountAuthorization {
 
     public boolean canRead(CustomUserDetails principal, UUID accountId) {

@@ -30,6 +30,7 @@ class AccountRepositoryIntegrationTest {
         Account saved = accounts.saveAndFlush(account);
 
         // Assert
+        assertNotNull(saved.getId());
         assertEquals(account.getId(), saved.getId());
         assertNotNull(saved.getCreatedAt());
         assertNotNull(saved.getLastUpdatedAt());
