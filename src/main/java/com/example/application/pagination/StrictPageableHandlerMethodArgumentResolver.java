@@ -26,8 +26,12 @@ public final class StrictPageableHandlerMethodArgumentResolver extends PageableH
     }
 
     @Override
-    public Pageable resolveArgument(MethodParameter methodParameter, @Nullable ModelAndViewContainer mavContainer,
-                                    NativeWebRequest webRequest, @Nullable WebDataBinderFactory binderFactory) {
+    public Pageable resolveArgument(
+            MethodParameter methodParameter,
+            @Nullable ModelAndViewContainer mavContainer,
+            NativeWebRequest webRequest,
+            @Nullable WebDataBinderFactory binderFactory
+    ) {
         validatePage(webRequest.getParameterValues("page"));
         validateSize(webRequest.getParameterValues("size"));
         return super.resolveArgument(methodParameter, mavContainer, webRequest, binderFactory);
