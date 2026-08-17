@@ -31,4 +31,24 @@ class AuthenticationFilterTest {
         // Act and assert
         assertFalse(filter.shouldNotFilter(request));
     }
+
+    @Test
+    void shouldNotFilter_shouldRecognizeVersionedRegistrationUnderContextPath() {
+        // Arrange
+        var request = new MockHttpServletRequest("POST", "/service/api/v2/auth/register");
+        request.setContextPath("/service");
+        request.setServletPath("/api/v2/auth/register");
+
+        // Act and assert
+        assertTrue(filter.shouldNotFilter(request));
+    }
+
+    @Test
+    void shouldNotFilter_shouldAuthenticateUnsupportedRegistrationMethods() {
+        // Arrange
+        var request = new MockHttpServletRequest("GET", "/api/v1/auth/register");
+
+        // Act and assert
+        assertFalse(filter.shouldNotFilter(request));
+    }
 }
