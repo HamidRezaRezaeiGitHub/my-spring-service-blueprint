@@ -1,127 +1,117 @@
 package com.example.application.error;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.Nullable;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
-import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.MissingServletRequestParameterException;
+import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
-import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
-import org.springframework.web.servlet.resource.NoResourceFoundException;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-import java.io.IOException;
 import java.util.List;
 
-import static java.util.Objects.requireNonNull;
-import static org.springframework.http.HttpStatus.FORBIDDEN;
-import static org.springframework.http.HttpStatus.UNAUTHORIZED;
+import static com.example.application.error.ProblemDetails.create;
 
 /**
- * Converts framework and boundary failures into the blueprint's stable error schema.
- * Feature exceptions should either carry an HTTP status themselves or receive a focused
- * handler beside their owning feature; this advice deliberately contains no domain table.
+ * Renders framework and cross-cutting failures as RFC 9457 problem details.
+ * Feature-owned exceptions retain focused advice in their owning packages.
  */
 @RestControllerAdvice
-@RequiredArgsConstructor
 @Slf4j
-public class GlobalExceptionHandler {
+public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
-    private final ResponseFacilitator responses;
-
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    ResponseEntity<ErrorResponse> validation(MethodArgumentNotValidException exception,
-                                             HttpServletRequest request) {
+    @Override
+    protected @Nullable ResponseEntity<Object> handleMethodArgumentNotValid(
+            MethodArgumentNotValidException exception,
+            HttpHeaders headers,
+            HttpStatusCode status,
+            WebRequest request
+    ) {
         List<String> errors = exception.getBindingResult().getAllErrors().stream()
                 .map(error -> error instanceof FieldError fieldError
-                        ? fieldError.getField() + ": " + error.getDefaultMessage()
-                        : requireNonNull(error.getDefaultMessage()))
+                        ? fieldError.getField() + ": " + safeValidationMessage(error.getDefaultMessage())
+                        : safeValidationMessage(error.getDefaultMessage()))
                 .toList();
-        return responses.badRequest(request, ResponseErrorType.VALIDATION_ERROR, errors);
+        return handleExceptionInternal(exception, ProblemDetails.validation(errors), headers, status, request);
     }
 
-    @ExceptionHandler(HandlerMethodValidationException.class)
-    ResponseEntity<ErrorResponse> methodValidation(HandlerMethodValidationException exception,
-                                                   HttpServletRequest request) {
+    @Override
+    protected @Nullable ResponseEntity<Object> handleHandlerMethodValidationException(
+            HandlerMethodValidationException exception,
+            HttpHeaders headers,
+            HttpStatusCode status,
+            WebRequest request
+    ) {
         List<String> errors = exception.getAllErrors().stream()
-                .map(error -> requireNonNull(error.getDefaultMessage()))
+                .map(error -> safeValidationMessage(error.getDefaultMessage()))
                 .toList();
-        return responses.badRequest(request, ResponseErrorType.VALIDATION_ERROR, errors);
+        return handleExceptionInternal(exception, ProblemDetails.validation(errors), headers, status, request);
     }
 
-    @ExceptionHandler({
-            IllegalArgumentException.class,
-            MissingServletRequestParameterException.class,
-            HttpMessageNotReadableException.class,
-            MethodArgumentTypeMismatchException.class
-    })
-    ResponseEntity<ErrorResponse> badRequest(Exception exception, HttpServletRequest request) {
-        return responses.badRequest(request, List.of(safeMessage(exception, "Malformed request")));
+    @Override
+    protected @Nullable ResponseEntity<Object> handleHttpMessageNotReadable(
+            HttpMessageNotReadableException exception,
+            HttpHeaders headers,
+            HttpStatusCode status,
+            WebRequest request
+    ) {
+        ProblemDetail problemDetail = create(HttpStatus.BAD_REQUEST, "Request body is malformed or unreadable");
+        return handleExceptionInternal(exception, problemDetail, headers, status, request);
+    }
+
+    @Override
+    protected @Nullable ResponseEntity<Object> handleServletRequestBindingException(
+            ServletRequestBindingException exception,
+            HttpHeaders headers,
+            HttpStatusCode status,
+            WebRequest request
+    ) {
+        ProblemDetail problemDetail = create(HttpStatus.BAD_REQUEST, "A required request value is missing or invalid");
+        return handleExceptionInternal(exception, problemDetail, headers, status, request);
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    ProblemDetail badRequest(IllegalArgumentException exception) {
+        return create(HttpStatus.BAD_REQUEST, safeMessage(exception, "Request is invalid"));
     }
 
     @ExceptionHandler(AuthenticationException.class)
-    ResponseEntity<ErrorResponse> authentication(AuthenticationException exception,
-                                                 HttpServletRequest request) {
+    ProblemDetail authentication(AuthenticationException exception) {
         log.debug("Authentication rejected: {}", exception.getClass().getSimpleName());
-        return responses.unauthorized(request, List.of("Authentication failed"));
+        return create(HttpStatus.UNAUTHORIZED, "Authentication is required or was rejected");
     }
 
     @ExceptionHandler(AccessDeniedException.class)
-    ResponseEntity<ErrorResponse> accessDenied(AccessDeniedException exception,
-                                               HttpServletRequest request) {
+    ProblemDetail accessDenied(AccessDeniedException exception) {
         log.debug("Authorization rejected: {}", exception.getClass().getSimpleName());
-        return responses.forbidden(request, List.of("Access denied"));
+        return create(HttpStatus.FORBIDDEN, "Access is denied");
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
-    ResponseEntity<ErrorResponse> dataConflict(DataIntegrityViolationException exception,
-                                               HttpServletRequest request) {
+    ProblemDetail dataConflict(DataIntegrityViolationException exception) {
         log.warn("Persistence constraint rejected a request: {}", exception.getClass().getSimpleName());
-        return responses.conflict(request, List.of("The requested state conflicts with existing data"));
-    }
-
-    @ExceptionHandler(NoResourceFoundException.class)
-    ResponseEntity<ErrorResponse> notFound(NoResourceFoundException exception,
-                                           HttpServletRequest request) {
-        return responses.notFound(request, List.of("Resource not found"));
-    }
-
-    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
-    ResponseEntity<ErrorResponse> methodNotSupported(HttpRequestMethodNotSupportedException exception,
-                                                     HttpServletRequest request) {
-        return responses.badRequest(request, List.of("HTTP method is not supported for this resource"));
+        return create(HttpStatus.CONFLICT, "The requested state conflicts with existing data");
     }
 
     @ExceptionHandler(Exception.class)
-    ResponseEntity<ErrorResponse> unexpected(Exception exception, HttpServletRequest request) {
+    ProblemDetail unexpected(Exception exception) {
         log.error("Unhandled request failure", exception);
-        return responses.internalServerError(request, List.of("An unexpected error occurred"));
+        return create(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred");
     }
 
-    public void handleAuthenticationException(HttpServletRequest request, HttpServletResponse response,
-                                              AuthenticationException exception) throws IOException {
-        log.debug("Security filter authentication rejected: {}", exception.getClass().getSimpleName());
-        ErrorResponse body = requireNonNull(
-                responses.unauthorized(request, List.of("Authentication required")).getBody());
-        responses.writeErrorResponse(response, body, UNAUTHORIZED);
+    private static String safeValidationMessage(@Nullable String message) {
+        return message == null || message.isBlank() ? "Invalid value" : message;
     }
 
-    public void handleAccessDeniedException(HttpServletRequest request, HttpServletResponse response,
-                                            AccessDeniedException exception) throws IOException {
-        log.debug("Security filter authorization rejected: {}", exception.getClass().getSimpleName());
-        ErrorResponse body = requireNonNull(responses.forbidden(request, List.of("Access denied")).getBody());
-        responses.writeErrorResponse(response, body, FORBIDDEN);
-    }
-
+    @SuppressWarnings("SameParameterValue")
     private static String safeMessage(Exception exception, String fallback) {
         return exception.getMessage() == null || exception.getMessage().isBlank()
                 ? fallback
