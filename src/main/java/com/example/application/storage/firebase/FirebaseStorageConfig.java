@@ -1,7 +1,9 @@
 package com.example.application.storage.firebase;
 
+import com.example.application.firebase.FirebaseProperties;
 import com.example.application.storage.StorageProperties;
 import com.google.auth.oauth2.GoogleCredentials;
+import com.google.cloud.http.HttpTransportOptions;
 import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.StorageOptions;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -13,10 +15,18 @@ import org.springframework.context.annotation.Configuration;
 public class FirebaseStorageConfig {
 
     @Bean
-    Storage googleCloudStorage(GoogleCredentials credentials, StorageProperties properties) {
-        if (properties.getBucket() == null || properties.getBucket().isBlank()) {
+    Storage googleCloudStorage(GoogleCredentials credentials, StorageProperties storageProperties, FirebaseProperties firebaseProperties) {
+        if (storageProperties.getBucket() == null || storageProperties.getBucket().isBlank()) {
             throw new IllegalStateException("app.storage.bucket is required for the firebase storage provider");
         }
-        return StorageOptions.newBuilder().setCredentials(credentials).build().getService();
+        HttpTransportOptions transport = HttpTransportOptions.newBuilder()
+                .setConnectTimeout(firebaseProperties.getConnectTimeoutMs())
+                .setReadTimeout(firebaseProperties.getReadTimeoutMs())
+                .build();
+        return StorageOptions.newBuilder()
+                .setCredentials(credentials)
+                .setTransportOptions(transport)
+                .build()
+                .getService();
     }
 }
