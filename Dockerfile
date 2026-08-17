@@ -18,7 +18,7 @@
 # ---- Stage 1: build ----------------------------------------------------------
 # Uses the floating 3.9 tag so future Maven patch releases (security fixes)
 # are picked up automatically without requiring a Dockerfile edit.
-FROM maven:3.9-eclipse-temurin-25 AS build
+FROM maven:3-eclipse-temurin-26 AS build
 # The official Maven image sets MAVEN_CONFIG="/root/.m2". The Spring Boot
 # mvnw script appends $MAVEN_CONFIG verbatim to the Maven command line, which
 # causes "Unknown lifecycle phase '/root/.m2'" errors. Clear it so the wrapper
