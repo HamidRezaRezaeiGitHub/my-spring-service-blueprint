@@ -8,6 +8,10 @@ last_updated: 2026-08-17
 
 # Wiki Log
 
+## [2026-08-17] update | Dependency security triage
+
+Removed unused DevTools, applied supported security patch releases, added evidence-backed package-specific Dependency-Check suppressions with stale-rule enforcement, and recorded the remaining test-only shaded upstream findings.
+
 ## [2026-08-17] update | Reusable API responses and opt-in deployment
 
 Centralized generic RFC 9457 OpenAPI responses without adding documentation-only endpoints, established an onboarding-oriented Swagger tag order, recorded local startup-warning fixes, and made the GCP deployment templates explicitly opt-in with configuration preflight checks.

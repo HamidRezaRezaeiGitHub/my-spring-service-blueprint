@@ -83,6 +83,15 @@ class OpenApiContractIntegrationTest {
     private JsonMapper jsonMapper;
 
     @Test
+    void swaggerUi_shouldServeTheConfiguredPatchedWebJar() throws Exception {
+        // Arrange, act, and assert
+        mvc.perform(get("/swagger-ui/index.html"))
+                .andExpect(status().isOk());
+        mvc.perform(get("/swagger-ui/swagger-ui-bundle.js"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
     void apiDocs_shouldExposeEveryConcreteVersionedPathAndBearerScheme() throws Exception {
         // Arrange, act, and assert
         mvc.perform(get("/v3/api-docs"))

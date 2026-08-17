@@ -5,11 +5,13 @@ on:
     branches: [master]
     paths:
       - pom.xml
+      - .github/dependency-check-suppressions.xml
       - .github/workflows/security.yml
   push:
     branches: [master]
     paths:
       - pom.xml
+      - .github/dependency-check-suppressions.xml
       - .github/workflows/security.yml
   schedule:
     - cron: '0 2 * * 0'
@@ -42,6 +44,8 @@ jobs:
             -DskipTestScope=false
             -DassemblyAnalyzerEnabled=false
             -DossIndexAnalyzerEnabled=false
+            -DsuppressionFile=.github/dependency-check-suppressions.xml
+            -DfailBuildOnUnusedSuppressionRule=true
           )
 
           if [[ -n "$NVD_API_KEY" ]]; then
