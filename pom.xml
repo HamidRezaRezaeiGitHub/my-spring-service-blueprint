@@ -30,7 +30,7 @@
 		<java.version>25</java.version>
 		<archunit.version>1.4.2</archunit.version>
 		<firebase-admin.version>9.10.0</firebase-admin.version>
-		<google-cloud-storage.version>2.68.0</google-cloud-storage.version>
+		<google-cloud-storage.version>2.72.0</google-cloud-storage.version>
 		<!-- Security patch releases newer than the versions currently managed by Spring Boot 4.1.0. -->
 		<httpclient5.version>5.6.4</httpclient5.version>
 		<httpcore5.version>5.4.3</httpcore5.version>
